@@ -12,9 +12,6 @@ dist-ssr
 # Apple signing credentials — see CONTRIBUTING.md § Releasing
 sign.sh
 releases/**/*.app
-# Unversioned duplicate of the versioned .dmg, made only so the Homebrew cask
-# has a stable download URL. The versioned copy is the one that gets committed.
-releases/**/Judgement_aarch64.dmg
 
 # Editor directories and files
 .vscode/*

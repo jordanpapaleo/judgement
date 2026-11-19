@@ -2,7 +2,7 @@ cask "judgement" do
   version "0.1.0"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
 
-  url "https://github.com/jordanpapaleo/judgement/releases/download/v#{version}/Judgement_aarch64.dmg"
+  url "https://github.com/jordanpapaleo/judgement/releases/download/v#{version}/Judgement_#{version}_aarch64.dmg"
   name "Judgement"
   desc "Menu-bar store of engineering guidance for coding agents"
   homepage "https://github.com/jordanpapaleo/judgement"

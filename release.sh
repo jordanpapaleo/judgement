@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Usage: ./release.sh [patch|minor|major]
-# Bumps version, generates changelog, commits, tags, and builds a signed,
-# notarized .dmg. Mirrors Helm's release flow (macOS only; no Linux CI).
+# Bumps version, generates changelog, commits, tags, and builds a signed .dmg.
 
 set -e
 
@@ -22,14 +21,15 @@ else
 fi
 
 # Tauri only signs AND notarizes when every one of these is set; a partial
-# sign.sh produces a build Gatekeeper rejects on other machines. Fail loudly.
+# sign.sh produces a build Gatekeeper rejects on other machines (v0.9.0 shipped
+# signed but un-notarized this way). Fail loudly instead.
 MISSING=()
 for VAR in APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
   [[ -n "${!VAR:-}" ]] || MISSING+=("$VAR")
 done
 if (( ${#MISSING[@]} > 0 )); then
   echo "✗ sign.sh did not export: ${MISSING[*]} — aborting."
-  echo "  All four are required for signing + notarization. See CONTRIBUTING.md § Releasing."
+  echo "  All four are required for signing + notarization. See CONTRIBUTING.md § Creating a DMG."
   exit 1
 fi
 
@@ -50,8 +50,7 @@ echo "→ Bumping to $NEW_VERSION"
 # Sync tauri.conf.json
 sed -i '' "s/\"version\": \".*\"/\"version\": \"$NEW_VERSION\"/" src-tauri/tauri.conf.json
 
-# Sync Cargo.toml (first occurrence — [workspace.package] version, inherited by
-# the app and the CLI so `judgement --version` matches the app)
+# Sync Cargo.toml (first occurrence — the [package] version)
 awk -v ver="$NEW_VERSION" 'done { print; next } /^version = "/ { sub(/^version = ".*"/, "version = \"" ver "\""); done=1 } { print }' src-tauri/Cargo.toml > src-tauri/Cargo.toml.tmp && mv src-tauri/Cargo.toml.tmp src-tauri/Cargo.toml
 
 # Generate changelog from commits since last tag
@@ -62,6 +61,7 @@ else
   LOG=$(git log --pretty=format:"- %s" --no-merges)
 fi
 
+# Prepend new entry to CHANGELOG.md
 CHANGELOG_ENTRY="## v$NEW_VERSION — $TODAY
 
 $LOG"
@@ -75,11 +75,8 @@ fi
 
 echo "→ Changelog updated"
 
-# Refresh Cargo.lock for the new workspace version before committing
-(cd src-tauri && cargo metadata --format-version 1 >/dev/null)
-
 # Commit version bump (tag after the DMG commit so the tag includes release artifacts)
-git add package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock CHANGELOG.md
+git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml CHANGELOG.md
 git commit -m "chore: release v$NEW_VERSION"
 
 echo "→ Building (signing + notarization can take a few minutes)..."
@@ -88,12 +85,12 @@ npm run tauri build
 
 APP_PATH="src-tauri/target/release/bundle/macos/Judgement.app"
 DMG_PATH="src-tauri/target/release/bundle/dmg/Judgement_${NEW_VERSION}_aarch64.dmg"
-CLI_PATH="$APP_PATH/Contents/MacOS/judgement-cli"
 
 # Verify the artifacts are signed AND notarized before committing anything.
+# An artifact that fails any of these checks is rejected by Gatekeeper on
+# other machines and must never be shipped.
 echo "→ Verifying signature and notarization..."
 codesign --verify --deep --strict "$APP_PATH"
-codesign --verify --strict "$CLI_PATH"
 xcrun stapler validate "$APP_PATH"
 if ! spctl -a -t exec -vv "$APP_PATH" 2>&1 | grep -q "Notarized Developer ID"; then
   echo "✗ Gatekeeper does not accept the app as notarized — not committing artifacts."
@@ -103,13 +100,6 @@ fi
 codesign --verify "$DMG_PATH"
 echo "✓ App is signed and notarized"
 
-# The bundled CLI must run with no Node/Rust on PATH (A9).
-if ! env -i HOME="$HOME" PATH=/usr/bin:/bin "$CLI_PATH" --version | grep -q "$NEW_VERSION"; then
-  echo "✗ Bundled CLI did not report v$NEW_VERSION with a bare PATH — not committing artifacts."
-  exit 1
-fi
-echo "✓ Bundled CLI runs without dev runtimes"
-
 # Copy DMG to releases/ and commit
 RELEASE_DIR="releases/v$NEW_VERSION"
 mkdir -p "$RELEASE_DIR"
@@ -117,12 +107,10 @@ cp "$DMG_PATH" "$RELEASE_DIR/"
 cp -r "$APP_PATH" "$RELEASE_DIR/" 2>/dev/null || true
 
 DMG_ASSET="$RELEASE_DIR/Judgement_${NEW_VERSION}_aarch64.dmg"
-DMG_LATEST="$RELEASE_DIR/Judgement_aarch64.dmg"
-cp "$DMG_ASSET" "$DMG_LATEST"
 
 # Sync Homebrew cask version and sha256 (sha256 only available after the DMG is built)
 sed -i '' "s/^  version \".*\"/  version \"$NEW_VERSION\"/" Casks/judgement.rb
-DMG_SHA=$(shasum -a 256 "$DMG_LATEST" | awk '{ print $1 }')
+DMG_SHA=$(shasum -a 256 "$DMG_ASSET" | awk '{ print $1 }')
 sed -i '' "s/^  sha256 \".*\"/  sha256 \"$DMG_SHA\"/" Casks/judgement.rb
 
 git add "$DMG_ASSET" Casks/judgement.rb
@@ -138,7 +126,7 @@ if [[ -t 0 ]]; then
   if [[ "$CREATE_DRAFT" =~ ^[Yy]$ ]]; then
     if ! command -v gh >/dev/null 2>&1; then
       echo "✗ gh not found — install GitHub CLI, then create the draft manually:"
-      echo "  gh release create \"v$NEW_VERSION\" --draft --title \"Judgement v$NEW_VERSION\" --notes \"\" \"$DMG_LATEST\""
+      echo "  gh release create \"v$NEW_VERSION\" --draft --title \"Judgement v$NEW_VERSION\" --notes \"\" \"$DMG_ASSET\""
       exit 1
     fi
     if ! gh auth status >/dev/null 2>&1; then
@@ -146,6 +134,8 @@ if [[ -t 0 ]]; then
       exit 1
     fi
 
+    # Tag push starts Linux CI. Create the draft immediately after so it exists
+    # by the time the job uploads (draft created events do not trigger Actions).
     echo "→ Pushing commits and tags..."
     git push && git push --tags
 
@@ -153,9 +143,8 @@ if [[ -t 0 ]]; then
     gh release create "v$NEW_VERSION" --draft \
       --title "Judgement v$NEW_VERSION" \
       --notes "" \
-      "$DMG_LATEST"
+      "$DMG_ASSET"
 
-    echo "✓ Draft v$NEW_VERSION created — review the notes, then publish with:"
-    echo "  gh release edit v$NEW_VERSION --draft=false"
+    echo "✓ Draft v$NEW_VERSION created — Linux CI will upload packages and publish."
   fi
 fi

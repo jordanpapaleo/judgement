@@ -19,19 +19,28 @@ learning records the harness and model that produced it, for your audit.
 The full, AI-readable setup guide is [`docs/setup-guide.md`](docs/setup-guide.md). It's
 also under **Help → Judgement Setup Guide** in the app and printed by `judgement guide`.
 
-1. Install `Judgement.app` into `/Applications` (DMG or `brew install --cask`
-   from `Casks/judgement.rb`) and open it. It lives in the menu bar; first
-   launch is **paused** until you choose **Resume Judgement**.
-2. In **Settings → Command-line tool**, choose **Link judgement into
-   ~/.local/bin**. This creates one symlink into the app bundle and never edits
-   your shell profile. Make sure `~/.local/bin` is on your `PATH`.
-3. Install the agent skill by hand, like your other skills:
+**macOS:**
 
-   ```sh
-   mkdir -p ~/.agents/skills/judgement
-   cp skill/judgement/SKILL.md ~/.agents/skills/judgement/SKILL.md
-   # review the diff in ~/.agents, run link.sh, start a new session
-   ```
+Download `Judgement_<version>_aarch64.dmg` from the [Releases](../../releases) page,
+open it, and drag Judgement to your Applications folder.
+
+With Homebrew:
+
+```sh
+brew tap jordanpapaleo/judgement https://github.com/jordanpapaleo/judgement.git
+brew install --cask jordanpapaleo/judgement/judgement
+```
+
+The cask also links the CLI as `judgement`.
+
+**Linux (Debian/Ubuntu):**
+
+Download `Judgement_<version>_amd64.deb` from the [Releases](../../releases) page, then
+`sudo dpkg -i Judgement_<version>_amd64.deb`.
+
+**Then:** open Judgement (it starts paused in the menu bar), choose **Resume
+Judgement**, link the CLI from **Settings → General**, and install the agent skill
+(`judgement skill`). The [setup guide](docs/setup-guide.md) walks through each step.
 
 ## CLI
 
