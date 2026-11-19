@@ -36,14 +36,14 @@ network access.
 1. Install `Judgement.app` into `/Applications` (open the DMG and drag it, or
    `brew install --cask` with the Judgement cask). Keep it in `/Applications`;
    the CLI link points inside the app.
-2. Open it. A dot appears in the menu bar. There is no Dock icon unless the
-   window is open.
+2. Open it. A small scales icon appears in the menu bar. There is no Dock icon
+   unless the window is open.
 3. Judgement starts **paused**. Click the menu-bar icon and choose **Resume
    Judgement** when you are ready for agents to use it.
 
-The menu-bar icon shows the state: a filled dot is **Active**, two bars are
-**Paused**, and an orange triangle means the store can't be opened (choose
-**Show Details…**).
+The menu-bar icon shows the state: the scales mean **Active**, the scales with
+a small pause badge mean **Paused**, and an orange triangle means the store
+can't be opened (choose **Show Details…**).
 
 Optional: turn on **Launch at Login** from the menu-bar menu or **Settings →
 General**.
