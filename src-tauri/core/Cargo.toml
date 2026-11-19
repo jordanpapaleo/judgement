@@ -1,0 +1,32 @@
+[package]
+name = "judgement-core"
+description = "Judgement store, validation, and the judgement CLI"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["cli"]
+# The CLI binary only. The app depends on this crate with default-features = false,
+# so it never links clap; the CLI never links Tauri (no Tauri dependency here at all).
+cli = ["dep:clap"]
+
+[[bin]]
+name = "judgement"
+path = "src/bin/judgement.rs"
+required-features = ["cli"]
+
+[dependencies]
+rusqlite = { version = "0.37", features = ["bundled", "backup"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ulid = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
+regex = "1"
+thiserror = "2"
+ts-rs = "11"
+clap = { version = "4", features = ["derive"], optional = true }
+
+[dev-dependencies]
+tempfile = "3"
