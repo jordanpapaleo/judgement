@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Apple code signing credentials for Judgement.
+# Copy to sign.sh (git-ignored) and fill in. release.sh sources it.
+# DO NOT COMMIT sign.sh
+
+export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAMID)"
+export APPLE_ID="you@example.com"
+export APPLE_PASSWORD="app-specific-password"
+export APPLE_TEAM_ID="TEAMID"
+
+echo "✓ Apple signing environment set"
