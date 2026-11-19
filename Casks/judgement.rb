@@ -1,6 +1,6 @@
 cask "judgement" do
   version "0.2.0"
-  sha256 "1f4afb3286e2913905aa12f3088c4fb88ae7f0bee60b2fb09471c75149860674"
+  sha256 "a7f64404749cb8a7016ca539b8d244e0d068d97a56a93ceb20a0cacef9be09a1"
 
   url "https://github.com/jordanpapaleo/judgement/releases/download/v#{version}/Judgement_#{version}_aarch64.dmg"
   name "Judgement"
