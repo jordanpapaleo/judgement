@@ -1,0 +1,34 @@
+[workspace]
+members = [".", "core"]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Jordan Papaleo"]
+edition = "2021"
+rust-version = "1.94"
+
+[package]
+name = "judgement-app"
+description = "Judgement menu-bar app"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "judgement_app_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+judgement-core = { path = "core", default-features = false }
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+rusqlite = "0.37"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ts-rs = "11"

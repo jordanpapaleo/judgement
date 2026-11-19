@@ -1,0 +1,52 @@
+{
+  "name": "judgement",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.1"
+  },
+  "scripts": {
+    "start": "tauri dev",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "cli": "scripts/build-cli.sh debug",
+    "cli:release": "scripts/build-cli.sh release",
+    "tauri": "tauri",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:types": "tsc --noEmit",
+    "test:rust": "cd src-tauri && cargo test --workspace",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "lint:rust": "cd src-tauri && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings"
+  },
+  "dependencies": {
+    "@iconify-json/uil": "1.2.3",
+    "@iconify/react": "6.0.2",
+    "@tanstack/react-query": "5.108.0",
+    "@tauri-apps/api": "2.12.4",
+    "daisyui": "5.5.20",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "zustand": "5.0.11"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.14",
+    "@tailwindcss/vite": "4.2.1",
+    "@tauri-apps/cli": "2.12.4",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.13",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "jsdom": "28.1.0",
+    "tailwindcss": "4.2.1",
+    "typescript": "5.8.3",
+    "vite": "7.3.8",
+    "vitest": "4.1.12"
+  }
+}

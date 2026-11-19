@@ -1,0 +1,51 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Judgement",
+  "version": "0.1.0",
+  "mainBinaryName": "Judgement",
+  "identifier": "com.jordanpapaleo.judgement",
+  "build": {
+    "beforeDevCommand": "npm run cli && npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run cli:release && npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Judgement",
+        "width": 1120,
+        "height": 740,
+        "minWidth": 880,
+        "minHeight": 560,
+        "visible": false,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": { "x": 12, "y": 22 }
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "devCsp": "default-src 'self'; script-src 'self' 'unsafe-inline' http://localhost:1420; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; object-src 'none'; base-uri 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "category": "DeveloperTool",
+    "shortDescription": "Store and recall engineering guidance for coding agents",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/judgement-cli"],
+    "macOS": {
+      "signingIdentity": null,
+      "minimumSystemVersion": "11.0"
+    }
+  }
+}
